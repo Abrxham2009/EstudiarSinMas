@@ -91,6 +91,34 @@ header{background-image:linear-gradient(135deg,rgba(255,255,255,.14),transparent
 .chart i{display:block;background:var(--acc);border-radius:6px 6px 0 0;min-height:3px;margin-bottom:3px}
 .fx{position:fixed;top:-2.5rem;z-index:99;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
+body{background:radial-gradient(900px 500px at 8% -10%,rgba(15,118,110,.2),transparent),radial-gradient(800px 500px at 100% 0,rgba(99,102,241,.18),transparent),var(--bg) fixed}
+header{background-image:linear-gradient(120deg,rgba(14,116,144,0),rgba(91,33,182,.55));box-shadow:0 6px 24px rgba(0,0,0,.18);border-radius:0 0 24px 24px}
+#uname{text-shadow:0 2px 12px rgba(0,0,0,.25)}
+nav button{transition:all .2s}nav button:hover{opacity:1;background:rgba(255,255,255,.16)}nav button.on,nav button.on:hover{background:var(--card);box-shadow:0 4px 12px rgba(0,0,0,.2);transform:translateY(-1px)}
+.btn{transition:transform .12s,filter .2s,box-shadow .2s;box-shadow:0 3px 10px rgba(15,118,110,.25)}.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}.btn:active{transform:scale(.95)}.btn.ghost{box-shadow:none}
+.card{border-radius:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.grid>.card:nth-child(4n+1){border-top:4px solid var(--acc)}.grid>.card:nth-child(4n+2){border-top:4px solid var(--hot)}.grid>.card:nth-child(4n+3){border-top:4px solid #8b5cf6}.grid>.card:nth-child(4n){border-top:4px solid #ec4899}
+.big{background:linear-gradient(90deg,var(--acc),#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bar i{background:linear-gradient(90deg,var(--acc),#6366f1)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc2)}
+.item{transition:background .2s}.item:hover{background:var(--acc2);border-radius:10px}
+.regbox{box-shadow:0 20px 60px rgba(0,0,0,.15);animation:up .5s}
+td.h{width:100px;white-space:nowrap}
+.fade{animation:up .35s}
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+.pk{position:fixed;inset:0;z-index:200;background:rgba(10,0,0,.93) repeating-linear-gradient(0deg,rgba(255,0,0,.07) 0 2px,transparent 2px 4px);display:grid;place-items:center;padding:1rem;animation:fi .3s}
+.pk.bad{animation:flash .5s steps(2) 6}
+.pkb{background:#140404;border:2px solid #ef4444;border-radius:14px;padding:1.4rem;max-width:460px;width:100%;color:#fecaca;font-family:ui-monospace,monospace;box-shadow:0 0 40px #ef4444aa}
+.pk.bad .pkb{animation:shake .4s 8}
+.pkh{color:#ef4444;font-weight:800;margin-bottom:.8rem;letter-spacing:.05em}
+.pkl{min-height:5.5rem;font-size:.85rem;margin-bottom:.6rem}
+.pkt{margin:1rem 0;font-size:1.15rem;line-height:1.4;color:#fff}
+.pkt .m{display:block;margin-top:.8rem;font-size:.9rem;color:#86efac}
+@keyframes flash{50%{background-color:rgba(130,0,0,.97)}}
+@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,-4px)}}
+@keyframes fi{from{opacity:0}}
+#secret{position:fixed;right:1rem;bottom:1rem;z-index:90;width:50px;height:50px;border-radius:50%;border:0;font-size:1.5rem;background:var(--card);box-shadow:0 4px 16px rgba(0,0,0,.3);animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(8deg)}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -99,9 +127,10 @@ header{background-image:linear-gradient(135deg,rgba(255,255,255,.14),transparent
 <section id="reg" class="hidden">
   <form class="regbox" id="regForm">
     <h1>Empieza a estudiar mejor</h1>
-    <p>Dinos cómo te llamas. Todo se guarda en este dispositivo, sin cuentas.</p>
+    <p>Sin correos ni cuentas. Con tu nombre, instituto y clave recuperas tus datos en cualquier dispositivo.</p>
     <div><label for="rn">Tu nombre</label><input id="rn" required maxlength="40" autocomplete="given-name"></div>
     <div><label for="rs">Tu colegio o instituto</label><input id="rs" required maxlength="60"></div>
+    <div><label for="rp">Tu clave (mínimo 4 caracteres)</label><input id="rp" type="password" minlength="4" required autocomplete="off"></div>
     <button class="btn" type="submit">Entrar</button>
   </form>
 </section>
@@ -109,9 +138,10 @@ header{background-image:linear-gradient(135deg,rgba(255,255,255,.14),transparent
 <section id="app" class="hidden">
   <header>
     <div class="hwrap">
-      <div><div id="uname"></div><div id="uschool"></div></div>
+      <div><div id="uname"></div><div id="uschool"></div><div id="st" style="font-size:.75rem;opacity:.75;margin-top:.3rem"></div></div>
       <div class="hbtn">
-        <button class="btn sm" id="bTh">Tema</button>
+        <button class="btn sm" id="bSn">🔊</button>
+        <button class="btn sm" id="bTh">🌓 Tema</button>
         <button class="btn sm" id="bExp">Guardar copia</button>
         <button class="btn sm" id="bImp">Cargar copia</button>
         <button class="btn sm" id="bOut">Cambiar perfil</button>
@@ -126,30 +156,35 @@ header{background-image:linear-gradient(135deg,rgba(255,255,255,.14),transparent
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// ⬇️ PEGA AQUÍ LOS DOS DATOS DE TU FIREBASE (apiKey y projectId)
+const FB={apiKey:'AIzaSyBRKQaM76jFUjGAIsClUANyN3LkV1k__LQ',projectId:'estudiarsinmas'};
 const KEY='estudio_v1';
 const blank=()=>({user:null,tasks:[],exams:[],notes:[],cards:[],sched:{},pomo:{}});
 let S;
 try{S=Object.assign(blank(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=blank()}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('No se pudo guardar. Usa "Guardar copia".')}};
+const save=()=>{S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('No se pudo guardar. Usa "Guardar copia".')}push()};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const today=()=>new Date().toISOString().slice(0,10);
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),2500)}
-const TABS=[['inicio','Inicio'],['tareas','Tareas'],['horario','Horario'],['examenes','Exámenes'],['apuntes','Apuntes'],['tarjetas','Tarjetas'],['pomo','Pomodoro']];
+const TABS=[['inicio','🏠 Inicio'],['tareas','✅ Tareas'],['horario','🗓️ Horario'],['examenes','📝 Exámenes'],['apuntes','📒 Apuntes'],['tarjetas','🃏 Tarjetas'],['pomo','🍅 Pomodoro']];
 let tab='inicio',noteId=null,cardIdx=0,showBack=false,filt='pend';
 const days=['Lunes','Martes','Miércoles','Jueves','Viernes'];
-const hours=['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+const hours=['8:15–9:15','9:15–10:15','10:15–11:15','11:45–12:45','12:45–13:45','13:45–14:45'];
 
 function boot(){
-  document.documentElement.dataset.theme=S.theme||'';
+  document.documentElement.dataset.theme=S.theme||'';sec();$('#bSn').textContent=S.mute?'🔇':'🔊';
   if(!S.user){$('#reg').classList.remove('hidden');$('#app').classList.add('hidden');return}
   $('#reg').classList.add('hidden');$('#app').classList.remove('hidden');
-  mark();$('#uname').textContent=S.user.name;$('#uschool').textContent=S.user.school;
+  mark();setSt(cloud()?'☁️ Sincronización activa':'💾 Solo en este dispositivo');$('#uname').textContent=S.user.name;$('#uschool').textContent=S.user.school;
   document.title=S.user.name+' · Estudio';
   $('#nav').innerHTML=TABS.map(([k,l])=>`<button data-t="${k}" class="${k===tab?'on':''}">${l}</button>`).join('');
   render();
 }
-$('#regForm').onsubmit=e=>{e.preventDefault();S.user={name:$('#rn').value.trim(),school:$('#rs').value.trim()};save();boot();if(aroa()){fx(H,1000);toast('Hola Aroa 💖')}};
-$('#nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;boot()}};
+$('#regForm').onsubmit=async e=>{e.preventDefault();const name=$('#rn').value.trim(),school=$('#rs').value.trim();
+ if(cloud()){try{const nid=await sha(name.toLowerCase()+'|'+school.toLowerCase()+'|'+$('#rp').value);const d=await pull();
+  if(d){S=Object.assign(blank(),d);toast('Datos recuperados de la nube ☁️')}else if(S.id&&S.id!==nid)S=blank();S.id=nid}catch(x){toast('No pude conectar con la nube')}}
+ S.user={name,school};save();boot();if(aroa()){fx(H,1000);toast('Hola Aroa 💖')}};
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;boot();const v=$('#view');v.classList.remove('fade');void v.offsetWidth;v.classList.add('fade')}};
 $('#bOut').onclick=()=>{$('#rn').value=S.user.name;$('#rs').value=S.user.school;S.user=null;boot()};
 $('#bExp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='copia-estudio-'+today()+'.json';a.click()};
 $('#bImp').onclick=()=>$('#fImp').click();
@@ -203,7 +238,7 @@ function tareas(){
 /* HORARIO */
 function horario(){
   V(`<h2>Horario semanal</h2><div class="card hor"><table><tr><th></th>${days.map(d=>`<th>${d}</th>`).join('')}</tr>
-  ${hours.map((h,i)=>`<tr><td class="h">${h}</td>${days.map((d,j)=>`<td><input data-s="${j}-${i}" value="${esc(S.sched[j+'-'+i]||'')}" aria-label="${d} ${h}"></td>`).join('')}</tr>`).join('')}</table></div><p class="mut">Escribe la asignatura en cada hora. Se guarda solo.</p>`);
+  ${hours.map((h,i)=>`${i===3?'<tr><td class="h">11:15–11:45</td><td colspan="5" style="text-align:center;background:var(--acc2);color:var(--acc);font-weight:600">☕ Recreo</td></tr>':''}<tr><td class="h">${h}</td>${days.map((d,j)=>`<td><input data-s="${j}-${i}" value="${esc(S.sched[j+'-'+i]||'')}" aria-label="${d} ${h}"></td>`).join('')}</tr>`).join('')}</table></div><p class="mut">Escribe la asignatura en cada hora. Se guarda solo.</p>`);
   $('#view').oninput=e=>{const k=e.target.dataset.s;if(k){S.sched[k]=e.target.value;save()}};
 }
 
@@ -267,11 +302,37 @@ const H=['❤️','💖','💗','💕'];
 const aroa=()=>/^\s*aroa\s*$/i.test((S.user&&S.user.name)||'');
 function fx(em,ms){const n=Math.round(ms/25);for(let i=0;i<n;i++)setTimeout(()=>{const s=document.createElement('span');s.className='fx';s.textContent=em[i%em.length];s.style.left=Math.random()*100+'vw';s.style.fontSize=(1+Math.random()*1.6)+'rem';s.style.animationDuration=(.8+Math.random()*.4)+'s';document.body.append(s);setTimeout(()=>s.remove(),1300)},i*25)}
 function beep(){try{const a=new AudioContext(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();o.stop(a.currentTime+.4)}catch(e){}}
-function mark(){S.days=S.days||[];if(!S.days.includes(today())){S.days.push(today());save()}}
+function mark(){S.days=S.days||[];if(!S.days.includes(today())){S.days.push(today());try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
 function streak(){let n=0,d=new Date();const x=new Set(S.days||[]);if(!x.has(today()))d.setDate(d.getDate()-1);while(x.has(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n}
+const cloud=()=>FB.apiKey&&FB.projectId&&!/PEGA/.test(FB.apiKey+FB.projectId);
+const setSt=t=>{const e=$('#st');if(e)e.textContent=t};
+async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const furl=()=>`https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/perfiles/${S.id}?key=${FB.apiKey}`;
+async function pull(){const r=await fetch(furl());if(r.status===404)return null;if(!r.ok)throw 0;const j=await r.json();return JSON.parse(j.fields.data.stringValue)}
+let ptm;function push(){if(!cloud()||!S.id)return;clearTimeout(ptm);ptm=setTimeout(async()=>{try{const c={...S};delete c.id;const r=await fetch(furl(),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{data:{stringValue:JSON.stringify(c)}}})});if(!r.ok)throw 0;setSt('☁️ Guardado en la nube')}catch(e){setSt('⚠️ Sin conexión: guardado solo aquí')}},800)}
+let AC;
+function tone(f,d,t,v,at){try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+(at||0);o.type=t||'sine';o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(v||.08,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+function snd(k){if(S.mute)return;({click:()=>tone(520,.07,'triangle',.07),tab:()=>tone(660,.09,'sine',.07),ok:()=>{tone(660,.1,'sine',.08);tone(990,.16,'sine',.08,.09)},del:()=>tone(200,.15,'sawtooth',.05),pop:()=>tone(880,.06,'triangle',.06)}[k]||(()=>{}))()}
+document.addEventListener('click',e=>{const b=e.target.closest('button,.flip,input[type=checkbox],select');if(!b||b.id==='bSn')return;snd(b.closest('nav')?'tab':b.classList.contains('x')?'del':b.type==='checkbox'?(b.checked?'ok':'pop'):'click')},true);
+document.addEventListener('submit',()=>snd('ok'),true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const o=$('.pk');if(o)o.remove()}});
+$('#bSn').onclick=()=>{S.mute=!S.mute;save();$('#bSn').textContent=S.mute?'🔇':'🔊';if(!S.mute)snd('ok')};
+function sec(){let b=$('#secret');if(aroa()){if(!b){b=document.createElement('button');b.id='secret';b.textContent='🎁';b.setAttribute('aria-label','Sorpresa');b.onclick=prank;document.body.append(b)}}else if(b)b.remove()}
+function prank(){
+ const o=document.createElement('div');o.className='pk';
+ o.innerHTML='<div class="pkb"><div class="pkh">☠️ ALERTA DEL SISTEMA</div><div class="pkl" id="pkl"></div><div class="bar"><i id="pkp" style="width:0;background:#ef4444"></i></div><div class="pkt" id="pkt"></div><button class="btn" id="pkx" style="display:none">Cerrar</button></div>';
+ document.body.append(o);
+ const L=['Escaneando dispositivo...','Descargando MalwareXx.exe...','Instalando MalwareXx.exe...','Ocultando archivos... (mentira)'];
+ let p=0,n=0;const lg=$('#pkl'),pb=$('#pkp');
+ const iv=setInterval(()=>{p=Math.min(100,p+2+Math.random()*5);pb.style.width=p+'%';tone(300+p*6,.05,'square',.03);while(n<L.length&&p>=(n+1)*22)lg.innerHTML+='&gt; '+L[n++]+'<br>';if(p>=100){clearInterval(iv);fin()}},120);
+ function fin(){o.classList.add('bad');$('#pkt').innerHTML='💀 Tu dispositivo ha sido infectado con <b>MalwareXx.exe</b> exitosamente';
+  for(let k=0;k<8;k++)tone(k%2?600:950,.22,'square',.05,k*.25);
+  setTimeout(()=>{$('#pkt').innerHTML+='<span class="m">😂 Es broma, Aroa. Tu dispositivo está a salvo. Un abrazo 💖</span>';fx(H,1000);$('#pkx').style.display='';$('#pkx').onclick=()=>o.remove();snd('ok')},3500)}
+}
 $('#bTh').onclick=()=>{const dk=document.documentElement.dataset.theme==='dark'||(!S.theme&&matchMedia('(prefers-color-scheme:dark)').matches);S.theme=dk?'light':'dark';save();boot()};
 $('#rn').oninput=e=>{if(/^\s*aroa\s*$/i.test(e.target.value))fx(H,1000)};
 boot();if(aroa())setTimeout(()=>fx(H,1000),300);
+if(cloud()&&S.id&&S.user)pull().then(d=>{if(d&&(d.ts||0)>(S.ts||0)){S=Object.assign(blank(),d,{id:S.id});try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}boot();setSt('☁️ Actualizado desde la nube')}}).catch(()=>{});
 </script>
 </body>
 </html>
