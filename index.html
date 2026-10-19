@@ -163,6 +163,7 @@ footer{text-align:center;padding:1.2rem;color:var(--mut);font-size:.85rem}
 .cd{min-height:80px;border:1px solid var(--line);border-radius:10px;padding:4px;font-size:.75rem;overflow:hidden}
 .cd.tdy{border-color:var(--acc);background:var(--acc2)}
 .ce{font-size:.68rem;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sg{position:fixed;left:6px;bottom:6px;width:22px;height:22px;border:0;border-radius:5px;background:var(--acc);opacity:.12;z-index:80;padding:0;transition:opacity .2s}#sg:hover{opacity:.9}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -196,6 +197,7 @@ footer{text-align:center;padding:1.2rem;color:var(--mut);font-size:.85rem}
   </header>
   <main id="view"></main>
   <footer>Hecho con 💜 por Abraham · v3</footer>
+  <button id="sg" aria-label="Secreto"></button>
 </section>
 
 <script>
@@ -383,6 +385,176 @@ const NEW=[['hacker','💻 Hacker','#000a03','#06140a','#b6ffc8','#5fbf7a','#0f3
 document.head.insertAdjacentHTML('beforeend','<style>'+NEW.map(v=>`:root[data-skin=${v[0]}]{--bg:${v[2]};--card:${v[3]};--ink:${v[4]};--mut:${v[5]};--line:${v[6]};--acc:${v[7]};--acc2:${v[8]};--hot:${v[9]};color-scheme:${v[11]?'dark':'light'}}:root[data-skin=${v[0]}] header{background:${v[10]}}${v[11]?`:root[data-skin=${v[0]}] .btn{color:#0a0a0a}`:''}`).join('')+'</style>');
 NEW.forEach(v=>{SK[v[0]]=[v[1],[v[2],v[7],v[9]]];if(v[11])DARKS.push(v[0])});
 const greet=()=>{const h=new Date().getHours();return h<6?'Buenas noches':h<13?'Buenos días':h<20?'Buenas tardes':'Buenas noches'};
+function game(){
+ const o=document.createElement('div');o.className='pk2';
+ o.innerHTML='<div class="pkc" style="max-width:560px"><div style="display:flex;justify-content:space-between;align-items:center"><h3>🟦 Cubo Saltarín</h3><b id="gs">0</b></div><canvas id="gc" width="520" height="220" style="width:100%;border-radius:12px;background:var(--bg);touch-action:manipulation;margin-top:.5rem"></canvas><p class="mut" style="margin:.5rem 0">Toca, haz clic o pulsa Espacio para saltar. Récord: <b id="gb">'+(S.best||0)+'</b></p><button class="btn sm" id="gx">Cerrar</button></div>';
+ document.body.append(o);
+ const c=$('#gc'),x=c.getContext('2d'),G=190;
+ let y=G-30,v=0,t=0,sc=0,ob=[],dead=false,raf;
+ const reset=()=>{y=G-30;v=0;t=0;sc=0;ob=[];dead=false};
+ const jump=()=>{if(dead){reset();return}if(y>=G-30){v=-11.5;snd('pop')}};
+ const close=()=>{cancelAnimationFrame(raf);document.removeEventListener('keydown',kd);o.remove()};
+ const kd=e=>{if(e.code==='Space'){e.preventDefault();jump()}if(e.key==='Escape')close()};
+ document.addEventListener('keydown',kd);c.onpointerdown=jump;$('#gx').onclick=close;o.onclick=e=>{if(e.target===o)close()};
+ function loop(){
+  const cs=getComputedStyle(document.documentElement),ac=cs.getPropertyValue('--acc').trim()||'#0f766e',ink=cs.getPropertyValue('--ink').trim()||'#000',hot=cs.getPropertyValue('--hot').trim()||'#f59e0b';
+  if(!dead){t++;sc=Math.floor(t/6);const sp=5+sc/40;v+=.7;y=Math.min(G-30,y+v);if(y>=G-30)v=0;
+   if(t%Math.max(45,Math.floor(95-sp*5))===0)ob.push({x:540,w:26});
+   ob.forEach(b=>b.x-=sp);ob=ob.filter(b=>b.x>-40);
+   for(const b of ob)if(b.x<60&&b.x+b.w>34&&y>G-52){dead=true;snd('del');if(sc>(S.best||0)){S.best=sc;save();$('#gb').textContent=sc}}}
+  x.clearRect(0,0,520,220);x.fillStyle=ink;x.fillRect(0,G,520,3);
+  x.fillStyle=ac;x.fillRect(32,y,30,30);x.fillStyle='#fff';x.fillRect(48,y+8,6,6);
+  x.fillStyle=hot;ob.forEach(b=>{x.beginPath();x.moveTo(b.x,G);x.lineTo(b.x+b.w/2,G-30);x.lineTo(b.x+b.w,G);x.fill()});
+  if(dead){x.fillStyle=ink;x.font='bold 20px sans-serif';x.fillText('¡Chocaste! Toca para reintentar',110,100)}
+  $('#gs').textContent=sc;raf=requestAnimationFrame(loop)}
+ loop()}
+function snake(){
+ const o=document.createElement('div');o.className='pk2';
+ o.innerHTML='<div class="pkc" style="max-width:420px"><div style="display:flex;justify-content:space-between;align-items:center"><h3>🐍 Snake</h3><span>🍎 <b id="ss">0</b> · Récord <b id="sb">'+(S.bestSnake||0)+'</b></span></div><canvas id="sc" width="400" height="400" style="width:100%;border-radius:12px;background:var(--bg);margin-top:.5rem;touch-action:none"></canvas><p class="mut" style="margin:.5rem 0">Flechas o WASD. En el móvil, desliza el dedo. Espacio o toque para reiniciar.</p><button class="btn sm" id="sx">Cerrar</button></div>';
+ document.body.append(o);
+ const c=$('#sc'),x=c.getContext('2d'),N=20,Z=20;
+ let sn,d,nd,f,sc,dead,iv,px,py;
+ const rf=()=>{do{f={x:Math.floor(Math.random()*N),y:Math.floor(Math.random()*N)}}while(sn.some(p=>p.x===f.x&&p.y===f.y))};
+ const reset=()=>{sn=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];d=nd={x:1,y:0};sc=0;dead=false;rf();$('#ss').textContent=0};
+ const turn=(a,b)=>{if(a!==-d.x||b!==-d.y)nd={x:a,y:b}};
+ const draw=()=>{const cs=getComputedStyle(document.documentElement),ac=cs.getPropertyValue('--acc').trim()||'#0f766e',ink=cs.getPropertyValue('--ink').trim()||'#000',hot=cs.getPropertyValue('--hot').trim()||'#f59e0b';
+  x.clearRect(0,0,400,400);x.globalAlpha=.08;x.fillStyle=ink;for(let i=0;i<N;i++)for(let j=0;j<N;j++)if((i+j)%2)x.fillRect(i*Z,j*Z,Z,Z);x.globalAlpha=1;
+  x.fillStyle=hot;x.beginPath();x.arc(f.x*Z+10,f.y*Z+10,8,0,7);x.fill();
+  sn.forEach((p,i)=>{x.fillStyle=ac;x.globalAlpha=i?.85:1;x.fillRect(p.x*Z+1,p.y*Z+1,Z-2,Z-2)});x.globalAlpha=1;
+  if(dead){x.fillStyle=ink;x.font='bold 22px sans-serif';x.textAlign='center';x.fillText('¡Game over! Pulsa Espacio',200,200);x.textAlign='left'}};
+ const step=()=>{if(dead)return;d=nd;const h={x:sn[0].x+d.x,y:sn[0].y+d.y};
+  if(h.x<0||h.y<0||h.x>=N||h.y>=N||sn.some(p=>p.x===h.x&&p.y===h.y)){dead=true;snd('del');if(sc>(S.bestSnake||0)){S.bestSnake=sc;save();$('#sb').textContent=sc}draw();return}
+  sn.unshift(h);if(h.x===f.x&&h.y===f.y){sc++;snd('ok');$('#ss').textContent=sc;rf()}else sn.pop();draw()};
+ const loop=()=>{step();iv=setTimeout(loop,Math.max(60,125-sc*3))};
+ const close=()=>{clearTimeout(iv);document.removeEventListener('keydown',kd);o.remove()};
+ const kd=e=>{const k=e.key.toLowerCase(),m={arrowup:[0,-1],w:[0,-1],arrowdown:[0,1],s:[0,1],arrowleft:[-1,0],a:[-1,0],arrowright:[1,0],d:[1,0]}[k];
+  if(m){e.preventDefault();turn(m[0],m[1])}else if(k===' '){e.preventDefault();if(dead)reset()}else if(k==='escape')close()};
+ document.addEventListener('keydown',kd);$('#sx').onclick=close;o.onclick=e=>{if(e.target===o)close()};
+ c.onpointerdown=e=>{px=e.clientX;py=e.clientY};
+ c.onpointerup=e=>{const dx=e.clientX-px,dy=e.clientY-py;if(Math.max(Math.abs(dx),Math.abs(dy))<20){if(dead)reset();return}Math.abs(dx)>Math.abs(dy)?turn(dx>0?1:-1,0):turn(0,dy>0?1:-1)};
+ reset();draw();loop()}
+function mc(){
+ const o=document.createElement('div');o.className='pk2';
+ o.innerHTML='<div class="pkc" style="max-width:1000px;padding:.8rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem"><h3 style="margin:0">⛏️ Minecraft Classic</h3><span><a class="btn sm ghost" style="text-decoration:none;display:inline-block" href="https://classic.minecraft.net" target="_blank" rel="noopener">Abrir en pestaña nueva</a> <button class="btn sm" id="mcx">Cerrar</button></span></div><iframe src="https://classic.minecraft.net" title="Minecraft Classic" allow="fullscreen; autoplay; clipboard-write" style="width:100%;height:68vh;border:0;border-radius:10px;background:#000"></iframe><p class="mut" style="margin:.4rem 0 0">Si ves la pantalla en blanco o un error, es que Mojang no deja verlo dentro de otras webs: usa «Abrir en pestaña nueva».</p></div>';
+ document.body.append(o);o.onclick=e=>{if(e.target===o||e.target.id==='mcx')o.remove()}}
+const th=()=>{const s=getComputedStyle(document.documentElement),g=k=>s.getPropertyValue(k).trim();return{ac:g('--acc')||'#0f766e',ink:g('--ink')||'#000',hot:g('--hot')||'#f59e0b'}};
+const best=k=>(S.hs&&S.hs[k])||0;
+const hs=(k,v)=>{S.hs=S.hs||{};if(v>(S.hs[k]||0)){S.hs[k]=v;save()}};
+function modal(title,body,w){
+ const o=document.createElement('div');o.className='pk2';
+ o.innerHTML=`<div class="pkc" style="max-width:${w||420}px"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${title}</h3><b id="gi" class="mut"></b></div>${body}<button class="btn sm" id="gx2" style="margin-top:.6rem">Cerrar</button></div>`;
+ document.body.append(o);
+ const M={o,onkey:null,stop:null,close(){M.stop&&M.stop();document.removeEventListener('keydown',kd);o.remove()}};
+ const kd=e=>{if(e.key==='Escape')M.close();else if(M.onkey)M.onkey(e)};
+ document.addEventListener('keydown',kd);$('#gx2').onclick=M.close;o.onclick=e=>{if(e.target===o)M.close()};return M}
+function g2048(){
+ const M=modal('🔢 2048','<div id="gb" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:.5rem;touch-action:none"></div><p class="mut" style="margin:.5rem 0">Flechas o desliza. Junta números iguales. Espacio reinicia.</p>');
+ let b,sc,over;
+ const add=()=>{const e=[];b.forEach((v,i)=>v||e.push(i));if(e.length)b[e[Math.floor(Math.random()*e.length)]]=Math.random()<.9?2:4};
+ const draw=()=>{$('#gb').innerHTML=b.map(v=>`<div style="aspect-ratio:1;display:grid;place-items:center;border-radius:10px;font-weight:800;font-size:${v>=1024?1.1:v>=128?1.4:1.7}rem;background:${v?`color-mix(in srgb,var(--acc) ${Math.min(100,15+Math.log2(v)*8)}%,var(--card))`:'var(--line)'};color:${v>4?'#fff':'var(--ink)'}">${v||''}</div>`).join('');$('#gi').textContent='Puntos '+sc+' · Récord '+best('2048')+(over?' · ¡Fin!':'')};
+ const reset=()=>{b=Array(16).fill(0);sc=0;over=false;add();add();draw()};
+ const mv=(dx,dy)=>{if(over)return;const nb=[...b];let moved=false;
+  for(let k=0;k<4;k++){const line=[0,1,2,3].map(i=>dx?(dx>0?k*4+3-i:k*4+i):(dy>0?(3-i)*4+k:i*4+k));
+   const vals=line.map(i=>b[i]).filter(Boolean),out=[];
+   for(let i=0;i<vals.length;i++){if(vals[i]===vals[i+1]){out.push(vals[i]*2);sc+=vals[i]*2;i++}else out.push(vals[i])}
+   line.forEach((idx,i)=>{const nv=out[i]||0;if(b[idx]!==nv)moved=true;nb[idx]=nv})}
+  if(!moved)return;b=nb;add();snd('pop');hs('2048',sc);
+  if(!b.includes(0)&&![...Array(16).keys()].some(i=>(i%4<3&&b[i]===b[i+1])||(i<12&&b[i]===b[i+4])))over=true;draw()};
+ const K={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],a:[-1,0],d:[1,0],w:[0,-1],s:[0,1]};
+ M.onkey=e=>{if(K[e.key]){e.preventDefault();mv(...K[e.key])}else if(e.key===' '){e.preventDefault();reset()}};
+ let sx,sy;const gb=$('#gb');gb.onpointerdown=e=>{sx=e.clientX;sy=e.clientY};
+ gb.onpointerup=e=>{const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<20)return;Math.abs(dx)>Math.abs(dy)?mv(dx>0?1:-1,0):mv(0,dy>0?1:-1)};
+ reset()}
+function memoria(){
+ const M=modal('🧠 Memoria','<div id="mg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:.5rem"></div><button class="btn sm ghost" id="mr" style="margin-top:.6rem">Reiniciar</button>');
+ const E=['🍎','🚀','🎸','🐱','⚽','🌈','🍕','👾'];let c,open,mv,lock;
+ const done=()=>c.every(x=>x.s===2);
+ const draw=()=>{$('#mg').innerHTML=c.map((x,i)=>`<button data-i="${i}" style="aspect-ratio:1;font-size:1.8rem;border-radius:12px;border:0;background:${x.s?'var(--acc2)':'var(--acc)'}">${x.s?x.e:''}</button>`).join('');$('#gi').textContent='Movs '+mv+' · Mejor '+((S.hs&&S.hs.mem)||'–')+(done()?' 🎉':'')};
+ const reset=()=>{c=[...E,...E].sort(()=>Math.random()-.5).map(e=>({e,s:0}));open=[];mv=0;lock=false;draw()};
+ $('#mr').onclick=reset;
+ $('#mg').onclick=e=>{const i=e.target.dataset.i;if(i==null||lock||c[i].s)return;c[i].s=1;open.push(+i);
+  if(open.length===2){mv++;const[a,b]=open;open=[];
+   if(c[a].e===c[b].e){c[a].s=c[b].s=2;snd('ok');if(done()){S.hs=S.hs||{};if(!S.hs.mem||mv<S.hs.mem){S.hs.mem=mv;save()}fx(['🎉'],600)}}
+   else{lock=true;setTimeout(()=>{c[a].s=c[b].s=0;lock=false;draw()},700)}}
+  draw()};
+ reset()}
+function tetris(){
+ const M=modal('🧱 Tetris','<canvas id="tc" width="200" height="400" style="width:100%;max-width:240px;display:block;margin:.5rem auto 0;border-radius:12px;background:var(--bg);touch-action:none"></canvas><p class="mut" style="margin:.5rem 0">← → mover · ↑ girar · ↓ bajar · Espacio caída. En móvil: desliza, toca para girar.</p>',320);
+ const c=$('#tc'),x=c.getContext('2d'),W=10,H=20,Z=20;
+ const P=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]],CL=['#06b6d4','#facc15','#a855f7','#3b82f6','#f97316','#22c55e','#ef4444'];
+ let g,pc,px,py,sc,dead,tm;
+ const rot=m=>m[0].map((_,i)=>m.map(r=>r[i]).reverse());
+ const hit=(m,ox,oy)=>m.some((r,j)=>r.some((v,i)=>v&&(ox+i<0||ox+i>=W||oy+j>=H||(oy+j>=0&&g[oy+j][ox+i]))));
+ const nw=()=>{const k=Math.floor(Math.random()*7);pc={m:P[k],k};px=Math.floor((W-pc.m[0].length)/2);py=0;if(hit(pc.m,px,py)){dead=true;hs('tetris',sc)}};
+ const reset=()=>{g=Array.from({length:H},()=>Array(W).fill(0));sc=0;dead=false;nw()};
+ const lock=()=>{pc.m.forEach((r,j)=>r.forEach((v,i)=>{if(v&&py+j>=0)g[py+j][px+i]=pc.k+1}));let n=0;g=g.filter(r=>{if(r.every(Boolean)){n++;return false}return true});while(g.length<H)g.unshift(Array(W).fill(0));if(n){sc+=[0,100,300,500,800][n];snd('ok')}hs('tetris',sc);nw()};
+ const draw=()=>{x.clearRect(0,0,200,400);g.forEach((r,j)=>r.forEach((v,i)=>{if(v){x.fillStyle=CL[v-1];x.fillRect(i*Z+1,j*Z+1,Z-2,Z-2)}}));
+  if(!dead)pc.m.forEach((r,j)=>r.forEach((v,i)=>{if(v){x.fillStyle=CL[pc.k];x.fillRect((px+i)*Z+1,(py+j)*Z+1,Z-2,Z-2)}}));
+  if(dead){x.fillStyle='rgba(0,0,0,.65)';x.fillRect(0,150,200,80);x.fillStyle='#fff';x.textAlign='center';x.font='bold 18px sans-serif';x.fillText('Game over',100,185);x.font='14px sans-serif';x.fillText('Espacio o toca',100,210);x.textAlign='left'}
+  $('#gi').textContent='Puntos '+sc+' · Récord '+best('tetris')};
+ const down=()=>{if(dead)return;if(!hit(pc.m,px,py+1))py++;else lock();draw()};
+ const mvx=d=>{if(!dead&&!hit(pc.m,px+d,py)){px+=d;draw()}};
+ const rt=()=>{if(dead)return;const r=rot(pc.m);if(!hit(r,px,py)){pc.m=r;draw()}};
+ const drop=()=>{if(dead)return;while(!hit(pc.m,px,py+1))py++;lock();draw()};
+ M.onkey=e=>{const k=e.key;if(k==='ArrowLeft'){e.preventDefault();mvx(-1)}else if(k==='ArrowRight'){e.preventDefault();mvx(1)}else if(k==='ArrowUp'){e.preventDefault();rt()}else if(k==='ArrowDown'){e.preventDefault();down()}else if(k===' '){e.preventDefault();if(dead){reset();draw()}else drop()}};
+ let sx,sy;c.onpointerdown=e=>{sx=e.clientX;sy=e.clientY};
+ c.onpointerup=e=>{const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)<15&&Math.abs(dy)<15){if(dead){reset();draw()}else rt()}else if(Math.abs(dx)>Math.abs(dy)){for(let i=0;i<Math.max(1,Math.round(Math.abs(dx)/20));i++)mvx(dx>0?1:-1)}else if(dy>0)drop()};
+ const loop=()=>{down();tm=setTimeout(loop,Math.max(120,520-Math.floor(sc/300)*40))};
+ M.stop=()=>clearTimeout(tm);reset();draw();loop()}
+function flappy(){
+ const M=modal('🐤 Pajarito','<canvas id="fc" width="320" height="420" style="width:100%;max-width:320px;display:block;margin:.5rem auto 0;border-radius:12px;background:var(--bg);touch-action:manipulation"></canvas><p class="mut" style="margin:.5rem 0">Toca, clic o Espacio para aletear.</p>',380);
+ const c=$('#fc'),x=c.getContext('2d');let y,v,p,sc,dead,t,raf;
+ const reset=()=>{y=200;v=0;p=[];sc=0;dead=false;t=0};
+ const flap=()=>{if(dead){reset();return}v=-6.2;snd('pop')};
+ M.onkey=e=>{if(e.code==='Space'||e.key==='ArrowUp'){e.preventDefault();flap()}};c.onpointerdown=flap;
+ const loop=()=>{const q=th();
+  if(!dead){t++;v+=.38;y+=v;if(t%90===1)p.push({x:330,g:50+Math.random()*210});p.forEach(o=>o.x-=2.4);p=p.filter(o=>o.x>-50);
+   p.forEach(o=>{if(!o.s&&o.x<58){o.s=1;sc++;snd('ok')}if(o.x<81&&o.x+46>59&&(y-11<o.g||y+11>o.g+110))dead=true});
+   if(y>409||y<0)dead=true;if(dead){snd('del');hs('flappy',sc)}}
+  x.clearRect(0,0,320,420);x.fillStyle=q.ac;p.forEach(o=>{x.fillRect(o.x,0,46,o.g);x.fillRect(o.x,o.g+110,46,420)});
+  x.fillStyle=q.hot;x.beginPath();x.arc(70,y,11,0,7);x.fill();x.fillStyle=q.ink;x.font='bold 30px sans-serif';x.fillText(sc,150,50);
+  if(dead){x.font='bold 18px sans-serif';x.textAlign='center';x.fillText('¡Chocaste! Toca para reintentar',160,210);x.textAlign='left'}
+  $('#gi').textContent='Récord '+best('flappy');raf=requestAnimationFrame(loop)};
+ M.stop=()=>cancelAnimationFrame(raf);reset();loop()}
+function pong(){
+ const M=modal('🏓 Pong','<canvas id="pc" width="400" height="260" style="width:100%;border-radius:12px;background:var(--bg);margin-top:.5rem;touch-action:none"></canvas><p class="mut" style="margin:.5rem 0">Ratón, dedo o W/S. Si el rival llega a 5, pierdes.</p>');
+ const c=$('#pc'),x=c.getContext('2d');let bx,by,vx,vy,py=110,cy=110,ps,cp,dead,raf;
+ const serve=d=>{bx=200;by=130;vx=3.4*d;vy=(Math.random()-.5)*4};
+ const reset=()=>{ps=0;cp=0;dead=false;serve(1)};
+ c.onpointermove=e=>{const r=c.getBoundingClientRect();py=Math.max(0,Math.min(220,(e.clientY-r.top)*260/r.height-20))};
+ M.onkey=e=>{const k=e.key.toLowerCase();if(k==='w'||k==='arrowup'){e.preventDefault();py=Math.max(0,py-22)}else if(k==='s'||k==='arrowdown'){e.preventDefault();py=Math.min(220,py+22)}else if(k===' '&&dead){e.preventDefault();reset()}};
+ c.onpointerdown=()=>{if(dead)reset()};
+ const loop=()=>{const q=th();
+  if(!dead){bx+=vx;by+=vy;if(by<6||by>254)vy=-vy;cy+=Math.max(-2.7,Math.min(2.7,by-(cy+20)));
+   if(vx<0&&bx<22&&bx>6&&by>py-6&&by<py+46){vx=Math.min(8,-vx*1.06);vy+=(by-(py+20))*.15;snd('pop')}
+   if(vx>0&&bx>378&&bx<394&&by>cy-6&&by<cy+46){vx=-Math.min(8,vx*1.06);vy+=(by-(cy+20))*.1}
+   if(bx<0){cp++;serve(1);snd('del');if(cp>=5){dead=true;hs('pong',ps)}}
+   if(bx>400){ps++;serve(-1);snd('ok')}}
+  x.clearRect(0,0,400,260);x.fillStyle=q.ink;x.globalAlpha=.2;for(let i=0;i<260;i+=20)x.fillRect(199,i,2,10);x.globalAlpha=1;
+  x.fillStyle=q.ac;x.fillRect(10,py,8,40);x.fillRect(382,cy,8,40);x.fillStyle=q.hot;x.beginPath();x.arc(bx,by,6,0,7);x.fill();
+  x.fillStyle=q.ink;x.font='bold 22px sans-serif';x.fillText(ps,170,28);x.fillText(cp,215,28);
+  if(dead){x.textAlign='center';x.fillText('¡Perdiste! Toca o Espacio',200,140);x.textAlign='left'}
+  $('#gi').textContent='Récord '+best('pong');raf=requestAnimationFrame(loop)};
+ M.stop=()=>cancelAnimationFrame(raf);reset();loop()}
+function tres(){
+ const M=modal('⭕ Tres en raya','<div id="tg" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:.5rem"></div><button class="btn sm ghost" id="tr" style="margin-top:.6rem">Nueva partida</button>');
+ const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let b,end;
+ const win=p=>L.some(l=>l.every(i=>b[i]===p));
+ const draw=()=>{$('#tg').innerHTML=b.map((v,i)=>`<button data-i="${i}" style="aspect-ratio:1;font-size:2.4rem;font-weight:800;border-radius:12px;border:2px solid var(--line);background:var(--card);color:${v==='X'?'var(--acc)':'var(--hot)'}">${v}</button>`).join('');$('#gi').textContent=end||('Victorias: '+best('ttt'))};
+ const reset=()=>{b=Array(9).fill('');end='';draw()};
+ const check=()=>{if(win('X')){end='¡Ganaste! 🎉';S.hs=S.hs||{};S.hs.ttt=best('ttt')+1;save();snd('ok')}else if(win('O'))end='Gana la IA 🤖';else if(b.every(Boolean))end='Empate'};
+ const cpu=()=>{const e=b.map((v,i)=>v?-1:i).filter(i=>i>=0),tp=p=>e.find(i=>{b[i]=p;const w=win(p);b[i]='';return w});
+  const m=tp('O')??tp('X')??(b[4]?null:4)??e[Math.floor(Math.random()*e.length)];b[m??e[Math.floor(Math.random()*e.length)]]='O'};
+ $('#tr').onclick=reset;
+ $('#tg').onclick=e=>{const i=e.target.dataset.i;if(i==null||b[i]||end)return;b[i]='X';snd('click');check();if(!end){cpu();check()}draw()};
+ reset()}
+function secreto(){
+ const G=[['⛏️ Minecraft Classic',mc],['🐍 Snake',snake],['🟦 Cubo Saltarín',game],['🔢 2048',g2048],['🧱 Tetris',tetris],['🐤 Pajarito',flappy],['🧠 Memoria',memoria],['🏓 Pong',pong],['⭕ Tres en raya',tres]];
+ const o=document.createElement('div');o.className='pk2';
+ o.innerHTML='<div class="pkc" style="max-width:420px;text-align:center"><h3>🤫 Zona secreta</h3><div class="skg">'+G.map((g,i)=>`<button class="btn ghost" data-g="${i}">${g[0]}</button>`).join('')+'</div><button class="btn sm" id="sgx" style="margin-top:1rem">Cerrar</button></div>';
+ document.body.append(o);
+ o.onclick=e=>{const i=e.target.dataset.g;if(e.target===o||e.target.id==='sgx')o.remove();else if(i!=null){o.remove();G[+i][1]()}}}
+$('#sg').onclick=secreto;
 let cal0=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 function calendario(){
  const y=cal0.getFullYear(),m=cal0.getMonth(),first=(cal0.getDay()+6)%7,nd=new Date(y,m+1,0).getDate(),ev={};
