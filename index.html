@@ -151,6 +151,18 @@ td.h{width:100px;white-space:nowrap}
 :root[data-skin=minecraft] .hbtn .btn{background:#6b4a2b}
 :root[data-skin=minecraft] .bar{border:2px solid #1e1e1e;background:#555}:root[data-skin=minecraft] .bar i,:root[data-skin=minecraft] .chart i{background:#5bd43a}
 :root[data-skin=minecraft] .sk{background:#a8a8a8;border:3px solid #1e1e1e}:root[data-skin=minecraft] .sk.on{background:#dcecc8}
+.bd{background:var(--hot);color:#1b1b1b;border-radius:99px;padding:0 .45rem;font-size:.75rem;margin-left:.2rem}
+footer{text-align:center;padding:1.2rem;color:var(--mut);font-size:.85rem}
+:root[data-skin=hacker] body{font-family:VT323,monospace;font-size:21px}
+:root[data-skin=hacker] :is(.card,.regbox,.pkc){border-color:#22ff66;box-shadow:0 0 12px rgba(34,255,102,.25)}
+:root[data-skin=arcade] :is(h1,h2,h3,#uname,.big,.time){font-family:'Press Start 2P',monospace;line-height:1.35}
+:root[data-skin=arcade] h2{font-size:1.05rem}:root[data-skin=arcade] h3{font-size:.85rem}:root[data-skin=arcade] .big{font-size:1.5rem}:root[data-skin=arcade] #uname{font-size:clamp(1.2rem,4.5vw,1.9rem)}:root[data-skin=arcade] .time{font-size:clamp(2.2rem,10vw,4.5rem)}
+:root[data-skin=arcade] .card{border-color:#ff2e97;box-shadow:0 0 14px rgba(255,46,151,.3)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:1rem 0 .5rem}
+.ch{text-align:center;font-weight:700;color:var(--mut);font-size:.8rem}
+.cd{min-height:80px;border:1px solid var(--line);border-radius:10px;padding:4px;font-size:.75rem;overflow:hidden}
+.cd.tdy{border-color:var(--acc);background:var(--acc2)}
+.ce{font-size:.68rem;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -183,6 +195,7 @@ td.h{width:100px;white-space:nowrap}
     <nav id="nav"></nav>
   </header>
   <main id="view"></main>
+  <footer>Hecho con 💜 por Abraham · v3</footer>
 </section>
 
 <script>
@@ -198,7 +211,7 @@ const save=()=>{S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const today=()=>new Date().toISOString().slice(0,10);
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),2500)}
-const TABS=[['inicio','🏠 Inicio'],['tareas','✅ Tareas'],['horario','🗓️ Horario'],['examenes','📝 Exámenes'],['apuntes','📒 Apuntes'],['tarjetas','🃏 Tarjetas'],['pomo','🍅 Pomodoro']];
+const TABS=[['inicio','🏠 Inicio'],['tareas','✅ Tareas'],['horario','🗓️ Horario'],['examenes','📝 Exámenes'],['apuntes','📒 Apuntes'],['tarjetas','🃏 Tarjetas'],['pomo','🍅 Pomodoro'],['calendario','📅 Calendario'],['extras','🧰 Extras'],['creditos','💜 Créditos']];
 let tab='inicio',noteId=null,cardIdx=0,showBack=false,filt='pend';
 const days=['Lunes','Martes','Miércoles','Jueves','Viernes'];
 const hours=['8:15–9:15','9:15–10:15','10:15–11:15','11:45–12:45','12:45–13:45','13:45–14:45'];
@@ -209,7 +222,7 @@ function boot(){
   $('#reg').classList.add('hidden');$('#app').classList.remove('hidden');
   mark();setSt(cloud()?'☁️ Sincronización activa':'💾 Solo en este dispositivo');$('#uname').textContent=S.user.name;$('#uschool').textContent=S.user.school;
   document.title=S.user.name+' · Estudio';
-  $('#nav').innerHTML=TABS.map(([k,l])=>`<button data-t="${k}" class="${k===tab?'on':''}">${l}</button>`).join('');
+  $('#nav').innerHTML=TABS.map(([k,l])=>`<button data-t="${k}" class="${k===tab?'on':''}">${l}${k==='tareas'&&S.tasks.some(t=>!t.done)?` <b class="bd">${S.tasks.filter(t=>!t.done).length}</b>`:''}</button>`).join('');
   render();
 }
 $('#regForm').onsubmit=async e=>{e.preventDefault();const name=$('#rn').value.trim(),school=$('#rs').value.trim();
@@ -222,7 +235,7 @@ $('#bExp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObj
 $('#bImp').onclick=()=>$('#fImp').click();
 $('#fImp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{S=Object.assign(blank(),JSON.parse(r.result));save();boot();toast('Copia cargada')}catch(x){toast('Archivo no válido')}};r.readAsText(f)};
 
-function render(){({inicio,tareas,horario,examenes,apuntes,tarjetas,pomo})[tab]()}
+function render(){({inicio,tareas,horario,examenes,apuntes,tarjetas,pomo,calendario,extras,creditos})[tab]()}
 const V=h=>$('#view').innerHTML=h;
 const daysTo=d=>Math.round((new Date(d+'T00:00')-new Date(today()+'T00:00'))/864e5);
 
@@ -232,16 +245,20 @@ function inicio(){
   const ex=S.exams.filter(e=>daysTo(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const pm=(S.pomo[today()]||0);
   const xp=S.tasks.filter(t=>t.done).length*10+Object.values(S.pomo).reduce((a,b)=>a+b,0)*20,lvl=Math.floor(xp/100)+1;
+  const rv=S.exams.map(e=>[e,daysTo(e.date)]).filter(x=>[7,3,1,0].includes(x[1])).map(([e,d])=>`<div class="item"><div class="t"><b>${esc(e.subject)}</b><div class="mut">${d===0?'¡Examen hoy!':'Examen en '+d+(d===1?' día':' días')+': toca repasar'}</div></div></div>`).join('')||'<p class="mut">Hoy no toca ningún repaso programado.</p>';
+  const ag={};for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const lg=(S.log||{})[d.toISOString().slice(0,10)]||{};for(const k in lg)ag[k]=(ag[k]||0)+lg[k]}
+  const mx=Math.max(1,...Object.values(ag)),sj=Object.entries(ag).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div style="margin:.5rem 0"><div style="display:flex;justify-content:space-between"><span>${esc(k)}</span><b>${v} min</b></div><div class="bar"><i style="width:${100*v/mx}%"></i></div></div>`).join('')||'<p class="mut">Usa el Pomodoro eligiendo asignatura y aquí verás tu tiempo.</p>';
   const Q=QS[Math.floor(Date.now()/864e5)%QS.length];
   const wk=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const n=S.pomo[d.toISOString().slice(0,10)]||0;return `<div><i style="height:${Math.min(n*12,70)}px"></i>${'DLMXJVS'[d.getDay()]}</div>`}).join('');
   const di=new Date().getDay()-1,hoy=di>=0&&di<5?hours.map((h,i)=>[h,S.sched[di+'-'+i]]).filter(x=>x[1]):[];
-  V(`<h2>Hola, ${esc(S.user.name)} 👋</h2><blockquote class="quote">${Q}</blockquote><div class="grid">
+  V(`<h2>${greet()}, ${esc(S.user.name)} 👋</h2><blockquote class="quote">${Q}</blockquote><div class="grid">
   <div class="card"><div class="mut">Tareas pendientes</div><div class="big">${pend.length}</div><div class="bar"><i style="width:${pct}%"></i></div><div class="mut">${pct}% completado</div></div>
   <div class="card"><div class="mut">Próximo examen</div>${ex?`<div class="big">${daysTo(ex.date)===0?'Hoy':daysTo(ex.date)+' d'}</div><div>${esc(ex.subject)}</div>`:'<div class="mut" style="margin-top:.6rem">Sin exámenes. Añade uno en Exámenes.</div>'}</div>
   <div class="card"><div class="mut">Pomodoros hoy</div><div class="big">${pm}</div><div class="mut">${pm*25} min de enfoque</div></div>
   <div class="card"><div class="mut">Racha de estudio</div><div style="display:flex;align-items:center;gap:.5rem"><span style="font-size:2rem;line-height:1">🔥</span><span class="big">${streak()}</span></div><div class="mut">días seguidos</div></div>
   <div class="card"><div class="mut">Nivel ${lvl}</div><div class="big">${xp} XP</div><div class="bar"><i style="width:${xp%100}%"></i></div><div class="mut">Tareas y pomodoros suman puntos</div></div></div>
   <div class="card" style="margin-top:1rem"><h3>Pomodoros de la semana</h3><div class="chart">${wk}</div></div>
+  <div class="grid" style="margin-top:1rem"><div class="card"><h3>🔁 Repasos de hoy</h3>${rv}</div><div class="card"><h3>⏱️ Tiempo por asignatura (7 días)</h3>${sj}</div></div>
   <div class="grid" style="margin-top:1rem">
   <div class="card"><h3>Hoy en clase</h3>${hoy.length?hoy.map(x=>`<div class="item"><span class="tag">${x[0]}</span><b>${esc(x[1])}</b></div>`).join(''):'<p class="mut">Nada en tu horario para hoy.</p>'}</div>
   <div class="card"><h3>Lo más urgente</h3>${pend.sort((a,b)=>(a.due||'9').localeCompare(b.due||'9')).slice(0,4).map(t=>`<div class="item"><div class="t"><b>${esc(t.text)}</b><div class="mut">${esc(t.subject||'')} ${t.due?'· '+t.due:''}</div></div></div>`).join('')||'<p class="mut">Todo al día. Buen trabajo.</p>'}</div></div>`);
@@ -258,12 +275,10 @@ function tareas(){
   <div><label>Fecha límite</label><input type="date" id="td"></div>
   <div><label>Prioridad</label><select id="tp"><option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option></select></div>
   <button class="btn">Añadir</button></form>
-  <div class="row" style="align-items:center">${[['pend','Pendientes'],['done','Hechas'],['all','Todas']].map(([k,n])=>`<button class="btn sm ${filt===k?'':'ghost'}" data-f="${k}">${n}</button>`).join('')}<span style="flex:1 1 10px"></span><button class="btn sm ghost" id="ics">📥 Importar de Classroom (.ics)</button><a class="btn sm ghost" style="text-decoration:none;display:inline-block" href="https://classroom.google.com" target="_blank" rel="noopener">Abrir Classroom</a><input type="file" id="icsf" accept=".ics" class="hidden"></div>
+  <div class="row" style="align-items:center">${[['pend','Pendientes'],['done','Hechas'],['all','Todas']].map(([k,n])=>`<button class="btn sm ${filt===k?'':'ghost'}" data-f="${k}">${n}</button>`).join('')}</div>
   <div>${l.map(t=>`<div class="item ${t.done?'done':''}"><input type="checkbox" data-c="${t.id}" ${t.done?'checked':''} aria-label="Hecha"><div class="t"><b>${esc(t.text)}</b><div class="mut">${esc(t.subject||'')} ${t.due?'· '+t.due:''}</div></div><span class="tag ${t.prio}">${t.prio}</span><button class="x" data-d="${t.id}" aria-label="Borrar">×</button></div>`).join('')||'<p class="mut">No hay tareas aquí. Añade la primera arriba.</p>'}</div></div>`);
   $('#tf').onsubmit=e=>{e.preventDefault();S.tasks.push({id:uid(),text:$('#tt').value,subject:$('#ts').value,due:$('#td').value,prio:$('#tp').value,done:false});save();render()};
-  $('#ics').onclick=()=>$('#icsf').click();
-  $('#icsf').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const n=importICS(String(rd.result));toast(n?n+' tareas importadas ✅':'No encontré tareas nuevas');render()};rd.readAsText(f)};
-  $('#view').onclick=e=>{const c=e.target.dataset;
+    $('#view').onclick=e=>{const c=e.target.dataset;
     if(c.f){filt=c.f;render()}
     if(c.d){S.tasks=S.tasks.filter(t=>t.id!==c.d);save();render()}};
   $('#view').onchange=e=>{const id=e.target.dataset.c;if(id){S.tasks.find(t=>t.id===id).done=e.target.checked;save();if(e.target.checked)fx(['🎉','✨','⭐'],500);render()}};
@@ -277,15 +292,21 @@ function horario(){
 }
 
 /* EXÁMENES */
+const tp=e=>{const T=e.topics||[],n=T.filter(x=>x.d).length;return `<div class="bar" style="max-width:260px"><i style="width:${T.length?100*n/T.length:0}%"></i></div><div style="display:flex;flex-wrap:wrap;gap:.3rem;align-items:center">${T.map((x,i)=>`<button class="tag" data-e="${e.id}" data-i="${i}" style="border:0;cursor:pointer;${x.d?'text-decoration:line-through;opacity:.6':''}">${esc(x.t)}</button>`).join('')}<button class="tag" data-ae="${e.id}" style="border:0;cursor:pointer">＋ tema</button></div>`};
 function examenes(){
   const g=S.exams.filter(e=>e.grade!==''&&e.grade!=null),avg=g.length?(g.reduce((a,e)=>a+ +e.grade,0)/g.length).toFixed(2):'–';
   V(`<h2>Exámenes y notas</h2><div class="grid"><div class="card stack"><h3>Añadir examen</h3><form class="stack" id="ef">
   <div><label>Asignatura</label><input id="es" required></div><div><label>Fecha</label><input type="date" id="ed" required></div>
   <div><label>Nota (si ya la tienes)</label><input type="number" step="0.01" min="0" max="10" id="eg"></div><button class="btn">Guardar</button></form>
   <div><div class="mut">Nota media</div><div class="big">${avg}</div></div></div>
-  <div class="card"><h3>Calendario</h3>${[...S.exams].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{const d=daysTo(e.date);return `<div class="item"><div class="t"><b>${esc(e.subject)}</b><div class="mut">${e.date}${e.grade!==''&&e.grade!=null?' · Nota '+e.grade:''}</div></div><span class="tag ${d<0?'':d<=7?'alta':'media'}">${d<0?'pasado':d===0?'hoy':d+' días'}</span><button class="x" data-d="${e.id}" aria-label="Borrar">×</button></div>`}).join('')||'<p class="mut">Aún no has añadido exámenes.</p>'}</div></div>`);
+  <div class="card"><h3>Calendario</h3>${[...S.exams].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{const d=daysTo(e.date);return `<div class="item"><div class="t"><b>${esc(e.subject)}</b><div class="mut">${e.date}${e.grade!==''&&e.grade!=null?' · Nota '+e.grade:''}</div>${tp(e)}</div><span class="tag ${d<0?'':d<=7?'alta':'media'}">${d<0?'pasado':d===0?'hoy':d+' días'}</span><button class="x" data-d="${e.id}" aria-label="Borrar">×</button></div>`}).join('')||'<p class="mut">Aún no has añadido exámenes.</p>'}</div></div>`);
   $('#ef').onsubmit=e=>{e.preventDefault();S.exams.push({id:uid(),subject:$('#es').value,date:$('#ed').value,grade:$('#eg').value});save();render()};
-  $('#view').onclick=e=>{const d=e.target.dataset.d;if(d){S.exams=S.exams.filter(x=>x.id!==d);save();render()}};
+  $('#view').onclick=e=>{const c=e.target.dataset;
+    if(c.d)S.exams=S.exams.filter(x=>x.id!==c.d);
+    else if(c.ae){const t=prompt('Nombre del tema (por ejemplo: Tema 3)');if(!t)return;const x=S.exams.find(y=>y.id===c.ae);(x.topics=x.topics||[]).push({t:t.trim(),d:false})}
+    else if(c.e){const x=S.exams.find(y=>y.id===c.e).topics[c.i];x.d=!x.d}
+    else return;
+    save();render()};
 }
 
 /* APUNTES */
@@ -301,34 +322,36 @@ function apuntes(){
 }
 
 /* TARJETAS */
+let curC=null;
 function tarjetas(){
-  const c=S.cards[cardIdx%Math.max(S.cards.length,1)];
-  V(`<h2>Tarjetas de estudio</h2><div class="grid"><div class="card stack"><h3>Nueva tarjeta</h3><form class="stack" id="cf"><div><label>Pregunta</label><input id="cq" required></div><div><label>Respuesta</label><input id="ca" required></div><button class="btn">Añadir</button></form><p class="mut">${S.cards.length} tarjetas guardadas</p></div>
-  <div class="card stack"><h3>Repasar</h3>${c?`<div class="flip" id="fl" tabindex="0">${esc(showBack?c.a:c.q)}</div><div class="mut" style="text-align:center">Toca la tarjeta para ver ${showBack?'la pregunta':'la respuesta'}</div><div class="center" style="margin:0"><button class="btn ghost sm" id="pv">Anterior</button><button class="btn sm" id="nx">Siguiente</button><button class="btn ghost sm" id="dc">Borrar</button></div>`:'<p class="mut">Añade tarjetas para empezar a repasar.</p>'}</div></div>`);
-  $('#cf').onsubmit=e=>{e.preventDefault();S.cards.push({id:uid(),q:$('#cq').value,a:$('#ca').value});save();render()};
+  const L=S.cards,dom=L.filter(c=>(c.k||0)>=3).length,c=L.find(x=>x.id===curC)||L[0];
+  V(`<h2>Tarjetas de estudio</h2><div class="grid"><div class="card stack"><h3>Nueva tarjeta</h3><form class="stack" id="cf"><div><label>Pregunta</label><input id="cq" required></div><div><label>Respuesta</label><input id="ca" required></div><button class="btn">Añadir</button></form><div class="mut">${L.length} tarjetas · ${dom} dominadas</div><div class="bar"><i style="width:${L.length?100*dom/L.length:0}%"></i></div></div>
+  <div class="card stack"><h3>Repasar</h3>${c?`<div class="flip" id="fl" tabindex="0">${esc(showBack?c.a:c.q)}</div><div class="mut" style="text-align:center">Toca la tarjeta para girarla</div>${showBack?`<div class="center" style="margin:0"><button class="btn ghost sm" id="no">😵 No la sabía</button><button class="btn sm" id="si">✅ La sabía</button></div>`:''}<div class="center" style="margin:0"><button class="btn ghost sm" id="dc">Borrar</button></div>`:'<p class="mut">Añade tarjetas para empezar. Las que falles te saldrán más veces.</p>'}</div></div>`);
+  $('#cf').onsubmit=e=>{e.preventDefault();S.cards.push({id:uid(),q:$('#cq').value,a:$('#ca').value,k:0});save();render()};
   if(c){const fl=()=>{showBack=!showBack;render()};$('#fl').onclick=fl;$('#fl').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fl()}};
-    $('#nx').onclick=()=>{cardIdx=(cardIdx+1)%S.cards.length;showBack=false;render()};
-    $('#pv').onclick=()=>{cardIdx=(cardIdx-1+S.cards.length)%S.cards.length;showBack=false;render()};
-    $('#dc').onclick=()=>{S.cards=S.cards.filter(x=>x!==c);cardIdx=0;showBack=false;save();render()}}
+    const nxt=()=>{const m=Math.min(...L.map(x=>x.k||0)),p=L.filter(x=>(x.k||0)===m&&x.id!==c.id),q=p.length?p:L.filter(x=>x.id!==c.id);curC=(q.length?q[Math.floor(Math.random()*q.length)]:c).id;showBack=false;save();render()};
+    if($('#si'))$('#si').onclick=()=>{c.k=(c.k||0)+1;fx(['⭐'],200);nxt()};
+    if($('#no'))$('#no').onclick=()=>{c.k=0;nxt()};
+    $('#dc').onclick=()=>{S.cards=S.cards.filter(x=>x!==c);curC=null;showBack=false;save();render()}}
 }
-
 /* POMODORO */
-let pt=null,left=25*60,mode='foco';
+let pt=null,left=25*60,mode='foco',plen=1500;
 function pomo(){
   const m=String(Math.floor(left/60)).padStart(2,'0'),s=String(left%60).padStart(2,'0');
-  V(`<h2>Pomodoro</h2><div class="card"><div class="mut" style="text-align:center">${mode==='foco'?'Hora de concentrarte':'Descanso'}</div><div class="time" id="tm">${m}:${s}</div>
+  V(`<h2>Pomodoro</h2><div class="card"><div class="mut" style="text-align:center">${mode==='foco'?'Hora de concentrarte':'Descanso'}</div><div style="max-width:320px;margin:0 auto 1rem"><label>¿Qué estás estudiando?</label><input id="psub" list="subs" value="${esc(S.psub||'')}" placeholder="Matemáticas, Historia..."><datalist id="subs">${[...new Set([...Object.values(S.sched),...S.exams.map(e=>e.subject),...S.tasks.map(t=>t.subject)].filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist></div><div class="time" id="tm">${m}:${s}</div>
   <div class="center"><button class="btn" id="pg">${pt?'Pausar':'Empezar'}</button><button class="btn ghost" id="pr">Reiniciar</button><button class="btn ghost" id="p25">Foco 25</button><button class="btn ghost" id="p50">Foco 50</button><button class="btn ghost" id="p5">Descanso 5</button></div>
   <p class="mut" style="text-align:center;margin-top:1rem">Hoy: ${S.pomo[today()]||0} sesiones completadas</p></div>`);
+  $('#psub').oninput=e=>{S.psub=e.target.value;save()};
   $('#pg').onclick=()=>{if(pt){clearInterval(pt);pt=null;pomo()}else{pt=setInterval(tick,1000);pomo()}};
-  $('#pr').onclick=()=>{clearInterval(pt);pt=null;left=mode==='foco'?1500:300;pomo()};
-  $('#p25').onclick=()=>{clearInterval(pt);pt=null;mode='foco';left=1500;pomo()};
-  $('#p50').onclick=()=>{clearInterval(pt);pt=null;mode='foco';left=3000;pomo()};
+  $('#pr').onclick=()=>{clearInterval(pt);pt=null;left=mode==='foco'?plen:300;pomo()};
+  $('#p25').onclick=()=>{clearInterval(pt);pt=null;mode='foco';left=plen=1500;pomo()};
+  $('#p50').onclick=()=>{clearInterval(pt);pt=null;mode='foco';left=plen=3000;pomo()};
   $('#p5').onclick=()=>{clearInterval(pt);pt=null;mode='descanso';left=300;pomo()};
 }
 function tick(){
   left--;const t=$('#tm');document.title=Math.floor(left/60)+':'+String(left%60).padStart(2,'0')+' · Estudio';
   if(t)t.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');
-  if(left<=0){clearInterval(pt);pt=null;if(mode==='foco'){S.pomo[today()]=(S.pomo[today()]||0)+1;save();mode='descanso';left=300}else{mode='foco';left=1500}
+  if(left<=0){clearInterval(pt);pt=null;if(mode==='foco'){S.pomo[today()]=(S.pomo[today()]||0)+1;S.log=S.log||{};const lg=S.log[today()]=S.log[today()]||{},sb=S.psub||'General';lg[sb]=(lg[sb]||0)+plen/60;save();mode='descanso';left=300}else{mode='foco';left=plen}
     toast('¡Tiempo! Cambia de fase.');beep();fx(['🍅','✨'],800);if(tab==='pomo')pomo()}
 }
 const QS=['Un pequeño paso cada día supera a un gran esfuerzo un solo día.','No tienes que ser perfecto, solo constante.','Estudiar hoy es regalarle tiempo a tu yo del futuro.','Empieza ahora: la motivación llega después.','Lo difícil de hoy será fácil mañana.','Descansar también es parte de estudiar.','Cada tarjeta repasada es un punto ganado.'];
@@ -344,21 +367,52 @@ async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncod
 const furl=()=>`https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/perfiles/${S.id}?key=${FB.apiKey}`;
 async function pull(){const r=await fetch(furl());if(r.status===404)return null;if(!r.ok)throw 0;const j=await r.json();return JSON.parse(j.fields.data.stringValue)}
 let ptm;function push(){if(!cloud()||!S.id)return;clearTimeout(ptm);ptm=setTimeout(async()=>{try{const c={...S};delete c.id;const r=await fetch(furl(),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{data:{stringValue:JSON.stringify(c)}}})});if(!r.ok)throw 0;setSt('☁️ Guardado en la nube')}catch(e){setSt('⚠️ Sin conexión: guardado solo aquí')}},800)}
-function importICS(txt){
- txt=txt.replace(/\r?\n[ \t]/g,'');
- const cal=((txt.match(/X-WR-CALNAME:(.*)/)||[])[1]||'Classroom').trim();let n=0;
- txt.split('BEGIN:VEVENT').slice(1).forEach(b=>{
-  const g=k=>{const m=b.match(new RegExp('^'+k+'[^:\\r\\n]*:(.*)$','m'));return m?m[1].trim():''};
-  const u=g('UID'),sum=g('SUMMARY').replace(/\\,/g,',').replace(/\\n/g,' '),ds=g('DTSTART')||g('DUE');
-  if(!sum||ds.length<8)return;
-  let date;
-  if(/^\d{8}T\d{6}Z$/.test(ds)){const x=new Date(Date.UTC(+ds.slice(0,4),+ds.slice(4,6)-1,+ds.slice(6,8),+ds.slice(9,11),+ds.slice(11,13)));date=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
-  else date=ds.slice(0,4)+'-'+ds.slice(4,6)+'-'+ds.slice(6,8);
-  if(date<today()||(u&&S.tasks.some(t=>t.uid===u)))return;
-  S.tasks.push({id:uid(),text:sum,subject:cal,due:date,prio:'media',done:false,uid:u});n++});
- save();return n}
 const SK={auto:['🖥️ Automático',['#eef2f6','#0f766e','#12263a']],clasico:['🌿 Clásico',['#eef2f6','#0f766e','#f59e0b']],oscuro:['🌙 Oscuro',['#0e1620','#2dd4bf','#fbbf24']],minecraft:['⛏️ Minecraft',['#6b4a2b','#4f8a1e','#f2c200']],oceano:['🌊 Océano',['#e6f4fa','#0369a1','#f59e0b']],atardecer:['🌇 Atardecer',['#fff4ec','#ea580c','#db2777']],rosa:['🌸 Rosa',['#fff0f6','#db2777','#8b5cf6']],espacio:['🚀 Espacio',['#0b0720','#a78bfa','#22d3ee']]};
 const DARKS=['oscuro','espacio'];
+const NEW=[['hacker','💻 Hacker','#000a03','#06140a','#b6ffc8','#5fbf7a','#0f3d1f','#22ff66','#0b2a14','#ffd60a','linear-gradient(120deg,#001a08,#003a14)',1],
+['arcade','🕹️ Arcade','#10002b','#1c0540','#f5e9ff','#b79ad6','#3c1a78','#ff2e97','#2d0a5c','#00f5d4','linear-gradient(120deg,#7b2cbf,#ff2e97)',1],
+['cyberpunk','🌆 Cyberpunk','#0a0f1f','#121a33','#e6f7ff','#8aa4c8','#233057','#00e5ff','#0d2a3a','#ff2bd6','linear-gradient(120deg,#6a00f4,#00a8cc)',1],
+['halloween','🎃 Halloween','#140a05','#221208','#ffe9d1','#c7976b','#4a2a12','#ff7a00','#3a1f0a','#a855f7','linear-gradient(120deg,#7c2d00,#4c1d95)',1],
+['cafe','☕ Café','#f3ebe0','#fffaf3','#3b2a20','#7d6554','#e3d5c4','#8b5a2b','#f1e3d0','#c2410c','linear-gradient(120deg,#6f4518,#a0652d)',0],
+['menta','🍃 Menta','#eafaf3','#ffffff','#0f3d2e','#4e7a69','#cdeedd','#10b981','#d1fae5','#f59e0b','linear-gradient(120deg,#059669,#14b8a6)',0],
+['lavanda','💜 Lavanda','#f3efff','#ffffff','#2a1d4f','#6f6396','#e0d7fb','#7c3aed','#ede9fe','#ec4899','linear-gradient(120deg,#7c3aed,#a78bfa)',0],
+['bosque','🌲 Bosque','#e8efe6','#fbfdf9','#1e2f1e','#566b56','#d2e0cd','#2f6b3a','#dcedd8','#b45309','linear-gradient(120deg,#1f4d2b,#3f7d4a)',0],
+['papel','📓 Cuaderno','#fbf7ec','#fffdf5','#2b2b3a','#6b6b80','#e8dfc8','#2563eb','#e0eaff','#dc2626','linear-gradient(120deg,#1d4ed8,#3b82f6)',0],
+['navidad','🎄 Navidad','#f6fbf6','#ffffff','#16301f','#4f6b57','#d7e8d9','#c1121f','#fde2e4','#15803d','linear-gradient(120deg,#c1121f,#15803d)',0],
+['futbol','⚽ Fútbol','#e7f4e4','#ffffff','#10311a','#4a6b50','#cfe5ca','#16a34a','#dcfce7','#eab308','linear-gradient(120deg,#15803d,#22c55e)',0]];
+document.head.insertAdjacentHTML('beforeend','<style>'+NEW.map(v=>`:root[data-skin=${v[0]}]{--bg:${v[2]};--card:${v[3]};--ink:${v[4]};--mut:${v[5]};--line:${v[6]};--acc:${v[7]};--acc2:${v[8]};--hot:${v[9]};color-scheme:${v[11]?'dark':'light'}}:root[data-skin=${v[0]}] header{background:${v[10]}}${v[11]?`:root[data-skin=${v[0]}] .btn{color:#0a0a0a}`:''}`).join('')+'</style>');
+NEW.forEach(v=>{SK[v[0]]=[v[1],[v[2],v[7],v[9]]];if(v[11])DARKS.push(v[0])});
+const greet=()=>{const h=new Date().getHours();return h<6?'Buenas noches':h<13?'Buenos días':h<20?'Buenas tardes':'Buenas noches'};
+let cal0=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function calendario(){
+ const y=cal0.getFullYear(),m=cal0.getMonth(),first=(cal0.getDay()+6)%7,nd=new Date(y,m+1,0).getDate(),ev={};
+ const add=(d,t,c)=>(ev[d]=ev[d]||[]).push([t,c]);
+ S.exams.forEach(e=>add(e.date,'📝 '+e.subject,'var(--hot)'));
+ S.tasks.filter(t=>!t.done&&t.due).forEach(t=>add(t.due,t.text,'var(--acc)'));
+ let cells='';for(let i=0;i<first;i++)cells+='<div></div>';
+ for(let d=1;d<=nd;d++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),E=ev[k]||[];cells+=`<div class="cd ${k===today()?'tdy':''}"><b>${d}</b>${E.slice(0,3).map(x=>`<div class="ce" style="border-left:3px solid ${x[1]}">${esc(x[0])}</div>`).join('')}${E.length>3?'<div class="mut">+'+(E.length-3)+' más</div>':''}</div>`}
+ V(`<h2>Calendario</h2><div class="card"><div class="row" style="align-items:center"><button class="btn sm ghost" id="cp" style="flex:0 0 auto">←</button><h3 style="flex:2;text-align:center;text-transform:capitalize;margin:0">${cal0.toLocaleDateString('es-ES',{month:'long',year:'numeric'})}</h3><button class="btn sm ghost" id="cn" style="flex:0 0 auto">→</button></div><div class="cal">${['L','M','X','J','V','S','D'].map(x=>`<div class="ch">${x}</div>`).join('')}${cells}</div><p class="mut">Amarillo: exámenes · Verde: tareas pendientes</p></div>`);
+ $('#cp').onclick=()=>{cal0=new Date(y,m-1,1);calendario()};$('#cn').onclick=()=>{cal0=new Date(y,m+1,1);calendario()};
+}
+let NZ;
+function stopNoise(){if(NZ){try{NZ.s.stop()}catch(e){}NZ=null}}
+function noise(t){stopNoise();AC=AC||new AudioContext();AC.resume();const n=AC.sampleRate*2,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);let l=0;
+ for(let i=0;i<n;i++){const w=Math.random()*2-1;if(t==='brown'){l=(l+.02*w)/1.02;d[i]=l*3.5}else d[i]=w*.5}
+ const s=AC.createBufferSource();s.buffer=b;s.loop=true;const g=AC.createGain();g.gain.value=+($('#vol')?$('#vol').value:.3);
+ if(t==='rain'){const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.4;s.connect(f);f.connect(g)}else s.connect(g);
+ g.connect(AC.destination);s.start();NZ={s,g}}
+function extras(){
+ V(`<h2>Extras para estudiar</h2><div class="grid">
+ <div class="card stack"><h3>🧮 ¿Qué nota necesito?</h3><div><label>Nota media que llevas</label><input id="n1" type="number" step="0.01" min="0" max="10"></div><div><label>Peso de lo que falta (%)</label><input id="n2" type="number" min="1" max="100" value="40"></div><div><label>Nota final que quieres</label><input id="n3" type="number" step="0.01" min="0" max="10" value="5"></div><button class="btn" id="nc">Calcular</button><div id="nr" style="font-weight:600"></div></div>
+ <div class="card stack"><h3>🎧 Sonidos para concentrarte</h3><div class="row"><button class="btn sm" data-z="rain">🌧️ Lluvia</button><button class="btn sm" data-z="white">📻 Ruido blanco</button><button class="btn sm" data-z="brown">🌊 Ruido marrón</button><button class="btn sm ghost" data-z="off">⏹ Parar</button></div><div><label>Volumen</label><input id="vol" type="range" min="0" max="1" step="0.05" value="0.3" style="padding:0"></div></div>
+ <div class="card"><h3>💡 Técnicas que funcionan</h3><div class="item"><div class="t"><b>Pomodoro</b><div class="mut">25 min de foco, 5 de descanso.</div></div></div><div class="item"><div class="t"><b>Repaso espaciado</b><div class="mut">Repasa a 1, 3 y 7 días de verlo.</div></div></div><div class="item"><div class="t"><b>Técnica Feynman</b><div class="mut">Explícalo con tus palabras, como a un niño.</div></div></div><div class="item"><div class="t"><b>Recuerdo activo</b><div class="mut">Usa Tarjetas: pruébate en vez de releer.</div></div></div></div></div>`);
+ $('#nc').onclick=()=>{const a=+$('#n1').value,w=+$('#n2').value/100,t=+$('#n3').value,x=(t-a*(1-w))/w;$('#nr').textContent=x>10?'Con esa nota ya no llegas a '+t+'. Prueba con un objetivo menor.':x<=0?'¡Ya lo tienes! 🎉':'Necesitas sacar un '+x.toFixed(2)+' en lo que falta.'};
+ $('#view').onclick=e=>{const z=e.target.dataset.z;if(z){z==='off'?stopNoise():noise(z)}};
+ $('#view').oninput=e=>{if(e.target.id==='vol'&&NZ)NZ.g.gain.value=+e.target.value};
+}
+function creditos(){
+ V(`<h2>Créditos</h2><div class="card" style="text-align:center;padding:2rem 1rem"><div style="font-size:3rem">💜</div><div class="big" style="font-size:clamp(1.8rem,7vw,3rem)">Hecho por Abraham</div><p class="mut">Una web para estudiar donde te organizas bien.</p><div class="row" style="justify-content:center;margin-top:1rem"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">Firebase</span><span class="tag">GitHub Pages</span></div><p class="mut" style="margin-top:1.2rem">Versión 3 · Gracias por usarla 🙌</p></div>`);
+}
 const curSkin=()=>S.skin||(S.theme==='dark'?'oscuro':S.theme==='light'?'clasico':'auto');
 function applySkin(){const k=curSkin(),d=document.documentElement;d.dataset.skin=k;d.dataset.theme=k==='auto'?'':(DARKS.includes(k)?'dark':'light')}
 function picker(){
