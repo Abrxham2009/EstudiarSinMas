@@ -153,7 +153,7 @@ td.h{width:100px;white-space:nowrap}
 :root[data-skin=minecraft] .sk{background:#a8a8a8;border:3px solid #1e1e1e}:root[data-skin=minecraft] .sk.on{background:#dcecc8}
 .bd{background:var(--hot);color:#1b1b1b;border-radius:99px;padding:0 .45rem;font-size:.75rem;margin-left:.2rem}
 footer{text-align:center;padding:1.2rem;color:var(--mut);font-size:.85rem}
-:root[data-skin=hacker] body{font-family:VT323,monospace;font-size:21px}
+:root[data-skin=hacker] body,:root[data-skin=ambar] body,:root[data-skin=gameboy] body{font-family:VT323,monospace;font-size:21px}
 :root[data-skin=hacker] :is(.card,.regbox,.pkc){border-color:#22ff66;box-shadow:0 0 12px rgba(34,255,102,.25)}
 :root[data-skin=arcade] :is(h1,h2,h3,#uname,.big,.time){font-family:'Press Start 2P',monospace;line-height:1.35}
 :root[data-skin=arcade] h2{font-size:1.05rem}:root[data-skin=arcade] h3{font-size:.85rem}:root[data-skin=arcade] .big{font-size:1.5rem}:root[data-skin=arcade] #uname{font-size:clamp(1.2rem,4.5vw,1.9rem)}:root[data-skin=arcade] .time{font-size:clamp(2.2rem,10vw,4.5rem)}
@@ -164,6 +164,25 @@ footer{text-align:center;padding:1.2rem;color:var(--mut);font-size:.85rem}
 .cd.tdy{border-color:var(--acc);background:var(--acc2)}
 .ce{font-size:.68rem;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #sg{position:fixed;left:6px;bottom:6px;width:22px;height:22px;border:0;border-radius:5px;background:var(--acc);opacity:.12;z-index:80;padding:0;transition:opacity .2s}#sg:hover{opacity:.9}
+.sb{position:fixed;inset:0;display:grid;place-items:center;z-index:120;pointer-events:none;padding:1rem}.sb div{background:var(--card);color:var(--ink);padding:1.2rem 1.6rem;border-radius:18px;border:3px solid var(--hot);font:800 clamp(1.2rem,4.5vw,2rem)/1.3 'Bricolage Grotesque',sans-serif;text-align:center;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.35);animation:pop .5s}
+@keyframes pop{from{transform:scale(.3) rotate(-8deg);opacity:0}}
+:root[data-skin=invalido] body{background:radial-gradient(900px 520px at 8% -10%,rgba(240,106,26,.3),transparent),radial-gradient(800px 500px at 100% 0,rgba(252,196,25,.16),transparent),radial-gradient(700px 400px at 50% 110%,rgba(240,106,26,.14),transparent),#0d0a0f fixed}
+:root[data-skin=invalido] header{background:linear-gradient(120deg,#3b1204,#b8420a 70%,#d97706);box-shadow:0 8px 30px rgba(240,106,26,.35)}
+:root[data-skin=invalido] :is(.big,#uname){background:linear-gradient(90deg,#f06a1a,#fcc419);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin=invalido] .bar i,:root[data-skin=invalido] .chart i{background:linear-gradient(90deg,#f06a1a,#fcc419)}
+:root[data-skin=invalido] .card{border-color:#4a2c18;box-shadow:0 2px 14px rgba(240,106,26,.12)}
+:root[data-skin=invalido] .btn{background:linear-gradient(90deg,#f06a1a,#fcc419);color:#1a0d05}
+:root[data-skin=invalido] .btn.ghost{background:transparent;color:var(--ink)}
+:root[data-skin=invalido] h2::after{content:' 🎸';font-size:.8em}
+.ip{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:1rem;background:rgba(10,4,0,.72);backdrop-filter:blur(3px);animation:fi .3s}
+.ipc{width:100%;max-width:460px;text-align:center;padding:2rem 1.4rem 1.6rem;border-radius:24px;color:#fff1d6;background:radial-gradient(circle at 50% 0,#3a1d0d,#150c08 70%);border:2px solid #fcc419;box-shadow:0 0 0 6px rgba(240,106,26,.25),0 24px 70px rgba(240,106,26,.45);animation:pop .55s}
+.ipe{display:flex;justify-content:center;gap:1rem;font-size:3.2rem;line-height:1}.ipe span{animation:bob 1.4s ease-in-out infinite}.ipe span+span{animation-delay:.4s}
+.ipt{margin-top:.8rem;font:800 clamp(1.7rem,7vw,2.5rem)/1.1 'Bricolage Grotesque',sans-serif;background:linear-gradient(90deg,#f06a1a,#fcc419,#f06a1a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ipl{height:3px;width:60%;margin:1rem auto;border-radius:9px;background:linear-gradient(90deg,transparent,#fcc419,transparent)}
+.ips{font-weight:600;color:#ffd98a;margin-bottom:1.2rem}
+.ipb{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+.ipc .btn{background:linear-gradient(90deg,#f06a1a,#fcc419);color:#1a0d05;text-shadow:none}
+.ipc .btn.ghost{background:transparent;color:#fff1d6;border:1px solid #6b4326}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -230,7 +249,7 @@ function boot(){
 $('#regForm').onsubmit=async e=>{e.preventDefault();const name=$('#rn').value.trim(),school=$('#rs').value.trim();
  if(cloud()){try{const nid=await sha(name.toLowerCase()+'|'+school.toLowerCase()+'|'+$('#rp').value);const d=await pull();
   if(d){S=Object.assign(blank(),d);toast('Datos recuperados de la nube ☁️')}else if(S.id&&S.id!==nid)S=blank();S.id=nid}catch(x){toast('No pude conectar con la nube')}}
- S.user={name,school};save();boot();if(aroa()){fx(H,1000);toast('Hola Aroa 💖')}};
+ S.user={name,school};save();boot();if(aroa()){fx(H,1000);toast('Hola Aroa 💖')}if(simon(name))inval()};
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;boot();const v=$('#view');v.classList.remove('fade');void v.offsetWidth;v.classList.add('fade')}};
 $('#bOut').onclick=()=>{$('#rn').value=S.user.name;$('#rs').value=S.user.school;S.user=null;boot()};
 $('#bExp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='copia-estudio-'+today()+'.json';a.click()};
@@ -381,7 +400,20 @@ const NEW=[['hacker','💻 Hacker','#000a03','#06140a','#b6ffc8','#5fbf7a','#0f3
 ['bosque','🌲 Bosque','#e8efe6','#fbfdf9','#1e2f1e','#566b56','#d2e0cd','#2f6b3a','#dcedd8','#b45309','linear-gradient(120deg,#1f4d2b,#3f7d4a)',0],
 ['papel','📓 Cuaderno','#fbf7ec','#fffdf5','#2b2b3a','#6b6b80','#e8dfc8','#2563eb','#e0eaff','#dc2626','linear-gradient(120deg,#1d4ed8,#3b82f6)',0],
 ['navidad','🎄 Navidad','#f6fbf6','#ffffff','#16301f','#4f6b57','#d7e8d9','#c1121f','#fde2e4','#15803d','linear-gradient(120deg,#c1121f,#15803d)',0],
-['futbol','⚽ Fútbol','#e7f4e4','#ffffff','#10311a','#4a6b50','#cfe5ca','#16a34a','#dcfce7','#eab308','linear-gradient(120deg,#15803d,#22c55e)',0]];
+['futbol','⚽ Fútbol','#e7f4e4','#ffffff','#10311a','#4a6b50','#cfe5ca','#16a34a','#dcfce7','#eab308','linear-gradient(120deg,#15803d,#22c55e)',0],
+['vaporwave','🌴 Vaporwave','#1a0b2e','#2a1247','#ffeefb','#c9a6e0','#4a2275','#ff71ce','#3a1860','#01cdfe','linear-gradient(120deg,#7b2ff7,#ff71ce)',1],
+['medianoche','🌌 Medianoche','#05080f','#0d1424','#e5ecff','#8a9bc0','#1c2a47','#60a5fa','#12203d','#f472b6','linear-gradient(120deg,#0f172a,#1e3a8a)',1],
+['volcan','🌋 Volcán','#170806','#261009','#ffe8dc','#d09580','#4d2015','#ff4d2e','#3d1810','#ffb703','linear-gradient(120deg,#7f1d1d,#ea580c)',1],
+['ambar','📟 Terminal ámbar','#120b00','#1c1100','#ffd98a','#c29a4a','#4a3000','#ffb000','#2e1c00','#ff6a00','linear-gradient(120deg,#2a1700,#5c3a00)',1],
+['elegante','👑 Elegante','#0f0e0c','#1a1814','#f5ecd6','#b3a584','#36301f','#d4af37','#2b2616','#f5d77a','linear-gradient(120deg,#1c1a14,#4a3b12)',1],
+['hielo','❄️ Hielo','#eaf6fb','#ffffff','#0c2d3f','#55788a','#cfe6f0','#0284c7','#e0f4fd','#6366f1','linear-gradient(120deg,#0284c7,#818cf8)',0],
+['desierto','🏜️ Desierto','#faf0dc','#fffaf0','#44301a','#856b4c','#ecd9b3','#b45309','#fdebc8','#0f766e','linear-gradient(120deg,#d97706,#9a3412)',0],
+['playa','🏖️ Playa','#fdf6e3','#ffffff','#0b3b4a','#4f7a88','#f0e2b8','#0891b2','#cffafe','#f59e0b','linear-gradient(120deg,#0891b2,#f59e0b)',0],
+['chicle','🍬 Chicle','#fff0fa','#ffffff','#4a1450','#8f5f95','#f7d0f0','#c026d3','#fae8ff','#0891b2','linear-gradient(120deg,#c026d3,#06b6d4)',0],
+['sandia','🍉 Sandía','#fff0f0','#ffffff','#3b1118','#85505a','#f7d1d6','#e11d48','#ffe4e8','#16a34a','linear-gradient(120deg,#e11d48,#16a34a)',0],
+['limon','🍋 Limón','#fffbe0','#ffffff','#3a3300','#7a7020','#f0e8a8','#a16207','#fef9c3','#16a34a','linear-gradient(120deg,#a16207,#4d7c0f)',0],
+['invalido','🎸 Inválido Perfecto','#0d0a0f','#1b1311','#fff1d6','#c4a483','#3d2616','#f06a1a','#2e1a0e','#fcc419','linear-gradient(120deg,#3b1204,#b8420a)',1],
+['gameboy','🎮 Game Boy','#cadc9f','#e6f0c4','#0f380f','#306230','#8bac0f','#306230','#c5d98a','#0f380f','linear-gradient(120deg,#0f380f,#306230)',0]];
 document.head.insertAdjacentHTML('beforeend','<style>'+NEW.map(v=>`:root[data-skin=${v[0]}]{--bg:${v[2]};--card:${v[3]};--ink:${v[4]};--mut:${v[5]};--line:${v[6]};--acc:${v[7]};--acc2:${v[8]};--hot:${v[9]};color-scheme:${v[11]?'dark':'light'}}:root[data-skin=${v[0]}] header{background:${v[10]}}${v[11]?`:root[data-skin=${v[0]}] .btn{color:#0a0a0a}`:''}`).join('')+'</style>');
 NEW.forEach(v=>{SK[v[0]]=[v[1],[v[2],v[7],v[9]]];if(v[11])DARKS.push(v[0])});
 const greet=()=>{const h=new Date().getHours();return h<6?'Buenas noches':h<13?'Buenos días':h<20?'Buenas tardes':'Buenas noches'};
@@ -437,6 +469,14 @@ function mc(){
  const o=document.createElement('div');o.className='pk2';
  o.innerHTML='<div class="pkc" style="max-width:1000px;padding:.8rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem"><h3 style="margin:0">⛏️ Minecraft Classic</h3><span><a class="btn sm ghost" style="text-decoration:none;display:inline-block" href="https://classic.minecraft.net" target="_blank" rel="noopener">Abrir en pestaña nueva</a> <button class="btn sm" id="mcx">Cerrar</button></span></div><iframe src="https://classic.minecraft.net" title="Minecraft Classic" allow="fullscreen; autoplay; clipboard-write" style="width:100%;height:68vh;border:0;border-radius:10px;background:#000"></iframe><p class="mut" style="margin:.4rem 0 0">Si ves la pantalla en blanco o un error, es que Mojang no deja verlo dentro de otras webs: usa «Abrir en pestaña nueva».</p></div>';
  document.body.append(o);o.onclick=e=>{if(e.target===o||e.target.id==='mcx')o.remove()}}
+const simon=n=>/^s[aeiyu]{1,3}m+o+n+$/.test(String(n||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\s._-]/g,''));
+function inval(){
+ if($('.ip'))return;
+ const on=curSkin()==='invalido',o=document.createElement('div');o.className='ip';
+ o.innerHTML=`<div class="ipc"><div class="ipe"><span>🎸</span><span>🎶</span></div><div class="ipt">Inválido Perfecto<br>hasta la muerte</div><div class="ipl"></div><div class="ips">Tema de Inválido Perfecto ya disponible</div><div class="ipb">${on?'':'<button class="btn" id="ipy">🎸 Activar tema</button>'}<button class="btn ghost" id="ipn">Cerrar</button></div></div>`;
+ document.body.append(o);fx(['🎸','🎶'],3500);
+ if(!S.mute)[[165,.18],[165,.18],[196,.18],[220,.18],[247,.5]].forEach((n,i)=>tone(n[0],n[1],'sawtooth',.05,i*.2));
+ o.onclick=e=>{if(e.target===o||e.target.id==='ipn')o.remove();else if(e.target.id==='ipy'){S.skin='invalido';save();applySkin();snd('ok');fx(['🎸','🎶'],900);o.remove()}}}
 const th=()=>{const s=getComputedStyle(document.documentElement),g=k=>s.getPropertyValue(k).trim();return{ac:g('--acc')||'#0f766e',ink:g('--ink')||'#000',hot:g('--hot')||'#f59e0b'}};
 const best=k=>(S.hs&&S.hs[k])||0;
 const hs=(k,v)=>{S.hs=S.hs||{};if(v>(S.hs[k]||0)){S.hs[k]=v;save()}};
@@ -609,11 +649,12 @@ function prank(){
  const iv=setInterval(()=>{p=Math.min(100,p+2+Math.random()*5);pb.style.width=p+'%';tone(300+p*6,.05,'square',.03);while(n<L.length&&p>=(n+1)*22)lg.innerHTML+='&gt; '+L[n++]+'<br>';if(p>=100){clearInterval(iv);fin()}},120);
  function fin(){o.classList.add('bad');$('#pkt').innerHTML='💀 Tu dispositivo ha sido infectado con <b>MalwareXx.exe</b> exitosamente';
   for(let k=0;k<8;k++)tone(k%2?600:950,.22,'square',.05,k*.25);
-  setTimeout(()=>{$('#pkt').innerHTML+='<span class="m">😂 Es broma, Aroa. Tu dispositivo está a salvo. Un abrazo 💖</span>';fx(H,1000);$('#pkx').style.display='';$('#pkx').onclick=()=>o.remove();snd('ok')},3500)}
+  setTimeout(()=>{$('#pkt').innerHTML+='<span class="m">Es broma, Aroa. Tu dispositivo está a salvo. Un abrazo 💖</span>';fx(H,1000);$('#pkx').style.display='';$('#pkx').onclick=()=>o.remove();snd('ok')},3500)}
 }
 $('#bTh').onclick=picker;
-$('#rn').oninput=e=>{if(/^\s*aroa\s*$/i.test(e.target.value))fx(H,1000)};
+$('#rn').oninput=e=>{if(/^\s*aroa\s*$/i.test(e.target.value))fx(H,1000);if(simon(e.target.value))fx(['🎸','🎶'],1200)};
 boot();if(aroa())setTimeout(()=>fx(H,1000),300);
+if(S.user&&simon(S.user.name))setTimeout(inval,500);
 if(cloud()&&S.id&&S.user)pull().then(d=>{if(d&&(d.ts||0)>(S.ts||0)){S=Object.assign(blank(),d,{id:S.id});try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}boot();setSt('☁️ Actualizado desde la nube')}}).catch(()=>{});
 </script>
 </body>
